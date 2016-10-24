@@ -3,6 +3,8 @@ process.env.NODE_ENV = 'test';
 const chai = require('chai');
 const should = chai.should();
 const chaiHttp = require('chai-http');
+const knex = require('../../src/db/connection');
+
 chai.use(chaiHttp);
 
 const server = require('../../src/server/app');
@@ -16,13 +18,16 @@ describe('routes : index', () => {
   describe('GET /', () => {
     it('should render the sum', (done) => {
       chai.request(server)
-      .get('/')
+      .get('/coffee')
       .end((err, res) => {
+        return knex('coffee').where('id', 1).first();
         res.redirects.length.should.equal(0);
         res.status.should.eql(200);
         res.type.should.eql('application/json');
-        res.body.should.eql({ sum: 3 });
-        res.body.sum.should.eql(3);
+        res.body.should.contain.keys('status', 'data');
+        res.body.status.should.eql('success');
+        res.body.data.should.eql('array');
+        res.body.data[0].id.should.eql('coffee.id');
         done();
       });
     });
